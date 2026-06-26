@@ -1,0 +1,5 @@
+.env
+__pycache__/
+*.pyc
+
+## Lista de arquivos que o Git deve ignorar — o .env nunca pode ir pro GitHub

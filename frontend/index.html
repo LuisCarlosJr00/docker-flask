@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do App</title>
+    <style>
+       body { font-family: Arial, sans-serif; max-width: 600px; margin: 40px auto; padding: 0 20px; }
+        input { padding: 8px; width: 70%; }
+        button { padding: 8px 16px; cursor: pointer; }
+        ul { list-style: none; padding: 0; }
+        li { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #eee; }
+        .concluida { text-decoration: line-through; color: gray; }
+    </style>      
+</head>
+<body>
+    <h1>Minhas Tarefas</h1>
+
+    <div>   
+        <input type="text" id="inputTarefa" placeholder="Nova tarefa...">
+        <button onclick="criarTarefa()">Adicionar</button>
+    </div>
+
+    <ul id="listaTarefas"></ul>
+
+    <script>
+        const API_URL = "/api/tarefas";
+
+        async function listarTarefas() {
+            const response = await fetch(API_URL);
+            const tarefas = await response.json();
+            const lista = document.getElementById('listaTarefas');
+            lista.innerHTML = "";
+            tarefas.forEach(t => {
+                lista.innerHTML +=`
+                    <li>
+                        <span class="${t.concluida ? 'concluida' : ''}">${t.titulo}</span>
+                        <div>
+                            <button onclick="concluirTarefa(${t.id})">Concluir</button>
+                            <button onclick="excluirTarefa(${t.id})">Excluir</button>
+                        </div>
+                    </li>`;
+            });
+        }
+
+        async function criarTarefa() {
+            const input = document.getElementById("inputTarefa");
+            if (!input.value.trim()) return;
+            await fetch(API_URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ titulo: input.value.trim() })
+            });
+            input.value = "";
+            listarTarefas();
+        }
+
+        async function concluirTarefa(id) {
+            await fetch(`${API_URL}/${id}`, { method: 'PUT' });
+            listarTarefas();
+        }
+
+        async function excluirTarefa(id) {
+            await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+            listarTarefas();
+        }
+
+        // Inicializa a lista de tarefas ao carregar a página
+        listarTarefas();
+    </script>
+</body>
+</html>

@@ -1,0 +1,36 @@
+
+services:             # aqui começa a lista de containers que serão criados
+
+  backend:            # nome que demos a esse serviço (pode ser qualquer nome)
+    build: .          # diz pro Compose construir a imagem usando o Dockerfile da pasta atual
+    ports:
+      - "5000:5000"   # mapeia a porta 5000 do container para a porta 5000 do seu PC
+                      # formato: "porta-do-seu-pc:porta-do-container"
+    env_file:
+      - .env  # define a variável de ambiente DATABASE_URL dentro do container, usando o valor do arquivo .env
+    depends_on:
+      - db                # diz que o serviço "backend" depende do serviço "db" (PostgreSQL)
+    restart: on-failure   # se o Flask travar porque o banco ainda não estava pronto, o Docker reinicia automaticamente
+
+  db:                 # nome do serviço para o banco de dados
+    image: postgres:15  # usa a imagem oficial do PostgreSQL versão 15
+    env_file:
+      - .env  #passa todas as variáveis do .env pro container do banco
+      
+    volumes:
+      - dados_db:/var/lib/postgresql/data  # monta um volume para persistir os dados do banco
+
+       
+  nginx:              # nome do serviço para o NGINX
+    image: nginx:latest  # usa a imagem oficial do NGINX
+    ports:
+      - "8888:80"          # mapeia a porta 80 do container para a porta 80 do seu PC
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf   # monta o arquivo de configuração do NGINX// Substitui as config padrão do nginx pela minha
+      - ./frontend:/usr/share/nginx/html           # monta a pasta do frontend como somente leitura // Coloca os meus arq. HTML dentro do container onde o NGINX serve
+    depends_on:
+      - backend          # diz que o serviço "nginx" depende do serviço "backend" (Flask), só sobe depois que o Flask estiver rodando
+    restart: on-failure   # reinicia o container caso ele pare de funcionar
+
+volumes:             # aqui definimos os volumes que serão usados pelos serviços
+  dados_db:            # nome do volume para o banco de dados
