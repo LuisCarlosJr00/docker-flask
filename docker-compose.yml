@@ -12,8 +12,8 @@ services:             # aqui começa a lista de containers que serão criados
       db:        # diz que o serviço "backend" depende do serviço "db" (PostgreSQL)
         condition: service_healthy       # O backend só sobe quando o banco passar no healthcheck      
     volumes:
-      - ./:/app  #  monta a pasta atual do seu PC (.) dentro do container em /app — o mesmo lugar onde o código está. Qualquer mudança que você salvar no VS Code aparece instantaneamente dentro do container
-  
+      #- ./:/app  #  monta a pasta atual do seu PC (.) dentro do container em /app — o mesmo lugar onde o código está. Qualquer mudança que você salvar no VS Code aparece instantaneamente dentro do container
+      # Volume não precisa quando vai fazer o deploy em servidor, só faz sentido para desenvolvimento local.
 
   db:                 # nome do serviço para o banco de dados
     image: postgres:15  # usa a imagem oficial do PostgreSQL versão 15
