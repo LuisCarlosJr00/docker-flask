@@ -26,7 +26,7 @@ def criar_tabela():
 #Rotas que o flask vai ficar escutando
 
 ####  Define qual método HTTP a rota aceita. GET = buscar dados, POST = criar, PUT = atualizar, DELETE = remover ####
-@app.route("/api/dever", methods=["GET"])
+@app.route("/api/tarefas", methods=["GET"])
 def listar_tarefas():
     conn = get_connection() # Obtendo a conexão com o banco de dados
     cursor = conn.cursor() # Criando um cursor para executar comandos SQL
