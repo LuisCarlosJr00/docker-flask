@@ -1,5 +1,5 @@
 
-from flask import Flask,jsonify,request
+from flask import Flask, jsonify, request, send_from_directory
 import os
 import psycopg2
 
@@ -7,12 +7,12 @@ app = Flask(__name__)
 
 # Funções que vão ser usadas para conectar ao banco de dados
 def get_connection():
-    return psycopg2.connect(os.environ["DATABASE_URL"]) # Obtendo a URL do banco de dados a partir da 
+    return psycopg2.connect(os.environ["DATABASE_URL"]) # Obtendo a URL do banco de dados a partir da
                                                         # variável de ambiente DATABASE_URL que definimos no docker-compose.yml
 def criar_tabela():
     conn = get_connection() # Obtendo a conexão com o banco de dados
     cursor = conn.cursor() # Criando um cursor para executar comandos SQL
-    cursor.execute("""       
+    cursor.execute("""
         CREATE TABLE IF NOT EXISTS tarefas (
             id SERIAL PRIMARY KEY,
             titulo TEXT NOT NULL,
@@ -23,9 +23,18 @@ def criar_tabela():
     cursor.close() # fecha o cursor, liberando recursos
     conn.close() # fecha a conexão com o banco, liberando recursos
 
+# Cria a tabela ao iniciar (funciona tanto com python app.py quanto com servidor WSGI no Railway)
+with app.app_context():
+    criar_tabela()
+
 #Rotas que o flask vai ficar escutando
 
 ####  Define qual método HTTP a rota aceita. GET = buscar dados, POST = criar, PUT = atualizar, DELETE = remover ####
+
+@app.route("/")
+def index():
+    return send_from_directory("frontend", "index.html") # Retorna o arquivo index.html da pasta frontend
+
 @app.route("/api/tarefas", methods=["GET"])
 def listar_tarefas():
     conn = get_connection() # Obtendo a conexão com o banco de dados
@@ -58,7 +67,7 @@ def concluir_tarefa(id):
     conn.close() # fecha a conexão com o banco, liberando recursos
     return jsonify({"mensagem": "Tarefa concluída com sucesso!"}) # Retorna os dados da tarefa atualizada em formato JSON
 
-@app.route ("/api/tarefas/<int:id>", methods = ["DELETE"])
+@app.route("/api/tarefas/<int:id>", methods=["DELETE"])
 def deletar_tarefa(id):
     conn = get_connection() # Obtendo a conexão com o banco de dados
     cursor = conn.cursor() # Criando um cursor para executar comandos SQL
@@ -69,5 +78,4 @@ def deletar_tarefa(id):
     return jsonify({"mensagem": "Tarefa deletada com sucesso!"}) # Retorna os dados da tarefa atualizada em formato JSON
 
 if __name__ == "__main__":
-    criar_tabela() # Chama a função para criar a tabela "tarefas" no banco de dados
-    app.run(host="0.0.0.0", port = 5000, debug=True) #  ativa o modo debug do Flask, que inclui o reloader automático
+    app.run(host="0.0.0.0", port=5000, debug=True) #  ativa o modo debug do Flask, que inclui o reloader automático
