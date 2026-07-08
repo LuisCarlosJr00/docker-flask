@@ -24,8 +24,10 @@ def criar_tabela():
     conn.close() # fecha a conexão com o banco, liberando recursos
 
 # Cria a tabela ao iniciar (funciona tanto com python app.py quanto com servidor WSGI no Railway)
-with app.app_context():
-    criar_tabela()
+
+if os.getenv("DATABASE_URL"):  # Só tenta conectar o banco de dados se a variavel DATABAS_URL existir - em prod exste, nos testes não
+    with app.app_context():    # Cria o contexto da aplicação para que possamos acessar a variável de ambiente DATABASE_URL
+        criar_tabela()
 
 #Rotas que o flask vai ficar escutando
 

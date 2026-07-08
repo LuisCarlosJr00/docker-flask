@@ -20,3 +20,8 @@ jobs:
 
       - name: Verificar sintaxe do app.py
         run: python -m py_compile app.py && echo "Sintaxe OK"
+
+      - name: Executar testes
+        run: 
+          pip install pytest
+          pytest tests/test_app.py
